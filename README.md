@@ -19,5 +19,5 @@ $ go build && ./client
 
 ```
 
-[post]: https://lanreadelowo.com/blog//2017/07/24/roundtripper-go/
+[link]: https://lanreadelowo.com/blog//2017/07/24/roundtripper-go/
 
