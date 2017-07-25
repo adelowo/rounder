@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -42,7 +43,7 @@ func main() {
 	req, err := http.NewRequest(http.MethodGet, "http://localhost:8000", strings.NewReader(""))
 
 	if err != nil {
-		panic("Whoops")
+		log.Fatalf("An error occurred ... %v", err)
 	}
 
 	for {
@@ -61,13 +62,15 @@ func main() {
 			resp, err := client.Do(req)
 
 			if err != nil {
-				panic(err)
+				log.Printf("An error occurred.... %v", err)
+				continue
 			}
 
 			buf, err := ioutil.ReadAll(resp.Body)
 
 			if err != nil {
-				panic(err)
+				log.Printf("An error occurred.... %v", err)
+				continue
 			}
 
 			fmt.Printf("The body of the response is \"%s\" \n\n", string(buf))
@@ -118,14 +121,14 @@ func (c *cacheTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 	resp, err := c.originalTransport.RoundTrip(r)
 
 	if err != nil {
-		panic("Yup")
+		return nil, err
 	}
 
 	// Get the body of the response so we can save it in the cache for the next request.
 	buf, err := httputil.DumpResponse(resp, true)
 
 	if err != nil {
-		panic("Yup again")
+		return nil, err
 	}
 
 	// Saving it to the cache store
@@ -136,6 +139,9 @@ func (c *cacheTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func (c *cacheTransport) Clear() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	c.data = make(map[string]string)
 	return nil
 }
